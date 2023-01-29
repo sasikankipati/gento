@@ -1,0 +1,469 @@
+<p-confirmDialog
+    header="Confirmation"
+    icon="pi pi-exclamation-triangle"
+></p-confirmDialog>
+<p-blockUI [blocked]="blocked">
+    <i class="pi pi-spin pi-spinner" style="font-size: 5rem; color: green"></i>
+</p-blockUI>
+
+<p-menu #menu [popup]="true" [model]="items"></p-menu>
+
+<div class="grid">
+    <div class="col-12">
+        <p-toolbar>
+            <div class="p-toolbar-group-start"></div>
+
+            <div class="p-toolbar-group-end">
+                <p-button
+                    icon="pi pi-bolt"
+                    styleClass="p-button-primary"
+                    (click)="save()"
+                ></p-button>
+            </div>
+        </p-toolbar>
+    </div>
+
+    <div class="col-1">
+        <div
+            class="card"
+            style="min-height: 50vh; position: fixed; width: 120px"
+        >
+            <div class="grid">
+                <ng-container *ngFor="let zone of zones">
+                    <div
+                        class="col"
+                        pDraggable="zone"
+                        (onDragStart)="dragStart(zone)"
+                        (onDragEnd)="dragEnd()"
+                    >
+                        <i [class]="zone.icon" [pTooltip]="zone.tooltip"></i>
+                    </div>
+                </ng-container>
+                <ng-container *ngFor="let vpc of vpcs">
+                    <div
+                        class="col"
+                        pDraggable="vpc"
+                        (onDragStart)="dragStart(vpc)"
+                        (onDragEnd)="dragEnd()"
+                    >
+                        <i [class]="vpc.icon" [pTooltip]="vpc.tooltip"></i>
+                    </div>
+                </ng-container>
+                <ng-container *ngFor="let subnet of subnets">
+                    <div
+                        class="col"
+                        pDraggable="subnet"
+                        (onDragStart)="dragStart(subnet)"
+                        (onDragEnd)="dragEnd()"
+                    >
+                        <i
+                            [class]="subnet.icon"
+                            [pTooltip]="subnet.tooltip"
+                        ></i>
+                    </div>
+                </ng-container>
+                <ng-container *ngFor="let server of servers">
+                    <div
+                        class="col"
+                        pDraggable="server"
+                        (onDragStart)="dragStart(server)"
+                        (onDragEnd)="dragEnd()"
+                    >
+                        <i
+                            [class]="server.icon"
+                            [pTooltip]="server.tooltip"
+                        ></i>
+                    </div>
+                </ng-container>
+                <ng-container *ngFor="let line of lines">
+                    <div class="col" (click)="editNetwork()">
+                        <i [class]="line.icon" [pTooltip]="line.tooltip"></i>
+                    </div>
+                </ng-container>
+            </div>
+        </div>
+    </div>
+    <div class="col-11">
+        <div class="card" style="min-height: 100vh">
+            <p-tabView (onChange)="tabChange($event)">
+                <p-tabPanel header="Designer">
+                    <div class="grid m-3" id="designer">
+                        <div
+                            class="col-12 p-3 pane"
+                            pDroppable="zone"
+                            (onDrop)="dropZone()"
+                        >
+                            <div class="grid" *ngIf="applications.length > 0">
+                                <div
+                                    [class]="
+                                        applications.length > 1
+                                            ? 'col-6'
+                                            : 'col'
+                                    "
+                                    *ngFor="
+                                        let app of applications;
+                                        let i = index
+                                    "
+                                    pDroppable="vpc"
+                                    (onDrop)="dropVPC(app)"
+                                >
+                                    <div
+                                        class="zone"
+                                        [pTooltip]="app.name"
+                                        [style]="
+                                            'background-color:' + app.color
+                                        "
+                                    >
+                                        <div class="p-3">
+                                            <div class="grid">
+                                                <div class="col-9">
+                                                    <h2>
+                                                        <i
+                                                            [class]="app.icon"
+                                                        ></i>
+                                                        {{ app.name }}
+                                                    </h2>
+                                                </div>
+                                                <div class="col-3 text-right">
+                                                    <i
+                                                        class="pi pi-pencil"
+                                                        (click)="
+                                                            edit(
+                                                                app,
+                                                                applications
+                                                            )
+                                                        "
+                                                        style="
+                                                            cursor: pointer;
+                                                            font-size: 1.5rem;
+                                                        "
+                                                    ></i>
+                                                    <i
+                                                        class="pi pi-trash"
+                                                        (click)="
+                                                            delete(
+                                                                applications,
+                                                                i
+                                                            )
+                                                        "
+                                                        style="
+                                                            margin-left: 5px;
+                                                            cursor: pointer;
+                                                            font-size: 1.5rem;
+                                                        "
+                                                    ></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div
+                                            *ngFor="
+                                                let vpc of app.children;
+                                                let v = index
+                                            "
+                                        >
+                                            <div
+                                                class="vpc"
+                                                pDroppable="subnet"
+                                                (onDrop)="dropSubnet(vpc)"
+                                                [style]="
+                                                    'background-color:' +
+                                                    vpc.color
+                                                "
+                                            >
+                                                <div class="grid">
+                                                    <div class="col-9">
+                                                        <h3>
+                                                            <span
+                                                                [class]="
+                                                                    vpc.icon
+                                                                "
+                                                            ></span>
+                                                            {{ vpc.name }}
+                                                        </h3>
+                                                    </div>
+                                                    <div
+                                                        class="col-3 text-right"
+                                                    >
+                                                        <i
+                                                            class="pi pi-pencil"
+                                                            (click)="edit(vpc)"
+                                                            style="
+                                                                cursor: pointer;
+                                                            "
+                                                        ></i>
+                                                        <i
+                                                            class="pi pi-trash"
+                                                            (click)="
+                                                                delete(
+                                                                    app.children,
+                                                                    v
+                                                                )
+                                                            "
+                                                            style="
+                                                                margin-left: 5px;
+                                                                cursor: pointer;
+                                                                font-size: 1.5rem;
+                                                            "
+                                                        ></i>
+                                                    </div>
+                                                </div>
+
+                                                <ng-container
+                                                    *ngFor="
+                                                        let subnet of vpc.children;
+                                                        let s = index
+                                                    "
+                                                >
+                                                    <div
+                                                        class="subnet"
+                                                        [id]="
+                                                            'coord_' + subnet.id
+                                                        "
+                                                        [style]="
+                                                            'background-color:' +
+                                                            subnet.color
+                                                        "
+                                                        pDroppable="server"
+                                                        (onDrop)="
+                                                            dropServer(subnet)
+                                                        "
+                                                    >
+                                                        <div class="grid">
+                                                            <div class="col-9">
+                                                                <h4>
+                                                                    <span
+                                                                        [class]="
+                                                                            subnet.icon
+                                                                        "
+                                                                    ></span>
+                                                                    {{
+                                                                        subnet.name
+                                                                    }}
+                                                                </h4>
+                                                            </div>
+                                                            <div
+                                                                class="col-3 text-right"
+                                                            >
+                                                                <i
+                                                                    class="pi pi-pencil"
+                                                                    (click)="
+                                                                        edit(
+                                                                            subnet
+                                                                        )
+                                                                    "
+                                                                    style="
+                                                                        cursor: pointer;
+                                                                    "
+                                                                ></i>
+                                                                <i
+                                                                    class="pi pi-trash"
+                                                                    (click)="
+                                                                        delete(
+                                                                            vpc.children,
+                                                                            s
+                                                                        )
+                                                                    "
+                                                                    style="
+                                                                        margin-left: 5px;
+                                                                        cursor: pointer;
+                                                                        font-size: 1.5rem;
+                                                                    "
+                                                                ></i>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="grid">
+                                                            <div
+                                                                class="col-3 p-5"
+                                                                *ngFor="
+                                                                    let server of subnet.children
+                                                                "
+                                                            >
+                                                                <div
+                                                                    [class]="
+                                                                        server.icon
+                                                                    "
+                                                                    [id]="
+                                                                        'coord_' +
+                                                                        server.id
+                                                                    "
+                                                                    style="
+                                                                        font-size: 3rem;
+                                                                        cursor: pointer;
+                                                                    "
+                                                                    (click)="
+                                                                        edit(
+                                                                            server
+                                                                        )
+                                                                    "
+                                                                ></div>
+                                                                <p>
+                                                                    {{
+                                                                        server.name
+                                                                    }}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </ng-container>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </p-tabPanel>
+                <p-tabPanel header="Teraform Code">
+                    <pre>{{ applications | json }}</pre>
+                    <pre>{{ networks | json }}</pre>
+                    <pre>{{ gg | json }}</pre>
+                </p-tabPanel>
+            </p-tabView>
+        </div>
+    </div>
+</div>
+
+<p-dialog
+    [(visible)]="display"
+    [modal]="true"
+    [style]="{ width: '30vw' }"
+    *ngIf="editObj"
+>
+    <ng-template pTemplate="header"
+        ><h2>Edit {{ editObj.category }}</h2></ng-template
+    >
+    <div class="p-fluid grid formgrid">
+        <div class="field col-12 md:col-12">
+            <label for="name">Name</label>
+            <input type="text" pInputText [(ngModel)]="editObj.name" />
+        </div>
+        <div
+            class="field col-12 md:col-12"
+            *ngIf="checkProp(editObj, 'region')"
+        >
+            <label for="name">Region</label>
+            <input type="text" pInputText [(ngModel)]="editObj.region" />
+        </div>
+        <div
+            class="field col-12 md:col-12"
+            *ngIf="checkProp(editObj, 'cdirRange')"
+        >
+            <label for="name">CDIR Range</label>
+            <input type="text" pInputText [(ngModel)]="editObj.cdirRange" />
+        </div>
+        <div class="field col-12 md:col-12" *ngIf="checkProp(editObj, 'from')">
+            <label for="name">From</label>
+            <input type="text" pInputText [(ngModel)]="editObj.from" />
+        </div>
+        <div class="field col-12 md:col-12" *ngIf="checkProp(editObj, 'to')">
+            <label for="name">To</label>
+            <input type="text" pInputText [(ngModel)]="editObj.to" />
+        </div>
+
+        <div class="field col-12 md:col-12" *ngIf="checkProp(editObj, 'type')">
+            <label for="name">Type</label>
+            <p-dropdown
+                [options]="types"
+                [(ngModel)]="editObj.type"
+                appendTo="body"
+            ></p-dropdown>
+        </div>
+        <div class="field col-12 md:col-12" *ngIf="checkProp(editObj, 'color')">
+            <label for="name">Color</label>
+            <div>
+                <p-colorPicker
+                    [(ngModel)]="editObj.color"
+                    appendTo="body"
+                ></p-colorPicker>
+            </div>
+        </div>
+    </div>
+    <ng-template pTemplate="footer">
+        <button
+            pButton
+            type="button"
+            label="Save"
+            class="p-button-primary"
+        ></button>
+    </ng-template>
+</p-dialog>
+
+<p-dialog
+    [(visible)]="displayNetwork"
+    [modal]="true"
+    [style]="{ width: '50vw' }"
+    *ngIf="applications.length > 0"
+>
+    <ng-template pTemplate="header"><h2>Network</h2></ng-template>
+
+    <p-tabView>
+        <p-tabPanel header="Add Network">
+            <div class="p-fluid grid formgrid">
+                <div class="field col-12 md:col-12">
+                    <label for="name">Name</label>
+                    <input type="text" pInputText [(ngModel)]="network.name" />
+                </div>
+                <div class="field col-12 md:col-12">
+                    <label for="name">From</label>
+                    <p-dropdown
+                        [options]="optionNetworks"
+                        [(ngModel)]="network.from"
+                        appendTo="body"
+                    ></p-dropdown>
+                </div>
+                <div class="field col-12 md:col-12">
+                    <label for="name">To</label>
+                    <p-dropdown
+                        [options]="optionNetworks"
+                        [(ngModel)]="network.to"
+                        appendTo="body"
+                    ></p-dropdown>
+                </div>
+                <div class="field col-12 md:col-12">
+                    <label for="name">Color</label>
+                    <div>
+                        <p-colorPicker
+                            [(ngModel)]="network.color"
+                            appendTo="body"
+                        ></p-colorPicker>
+                    </div>
+                </div>
+            </div>
+            <button
+                pButton
+                type="button"
+                label="Add"
+                (click)="addNetwork()"
+                class="p-button-primary"
+            ></button>
+        </p-tabPanel>
+        <p-tabPanel header="Networks">
+            <p-table [value]="networks">
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th>Action</th>
+                        <th>Name</th>
+                        <th>From</th>
+                        <th>To</th>
+                        <th>Color</th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-network let-index="rowIndex">
+                    <tr>
+                        <td>
+                            <button (click)="remove(network, index)">
+                                Delete
+                            </button>
+                        </td>
+                        <td>{{ network.name }}</td>
+                        <td>{{ network.from.label }}</td>
+                        <td>{{ network.to.label }}</td>
+                        <td>{{ network.color }}</td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </p-tabPanel>
+    </p-tabView>
+    <ng-template pTemplate="footer"> </ng-template>
+</p-dialog>

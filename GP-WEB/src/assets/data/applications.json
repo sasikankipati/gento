@@ -1,0 +1,15 @@
+{
+    "results":
+    [
+        {
+            "id"   : 1,
+            "name" : "ApplicationA",
+            "email": "ApplicationA@gmail.com"
+        },
+        {
+            "id"   : 2,
+            "name" : "ApplicationB",
+            "email": "ApplicationB@gmail.com"
+        }
+    ]
+}

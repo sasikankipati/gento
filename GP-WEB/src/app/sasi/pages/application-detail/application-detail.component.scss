@@ -1,0 +1,55 @@
+[pDraggable] {
+    cursor: move;
+}
+
+
+.pane{
+    min-height: 100vh;
+    border: 4px dotted #e3e3e3;
+}
+
+.zone{
+    border: 2px solid #e3e3e3;
+    min-height: 50vh;
+}
+
+.vpc{
+    border: 1px solid #e3e3e3;
+    padding: 15px;
+    margin: 10px;
+    min-height: 50vh;
+
+}
+
+.subnet{
+    border: 1px solid #e3e3e3;
+    padding: 10px;
+    margin: 5px;
+    min-height: 30vh;
+    margin-bottom: 100px;
+
+}
+
+.server{
+    border: 1px solid #e3e3e3;
+    padding: 10px;
+    margin: 5px;
+    min-height: 30vh;
+}
+
+
+
+.iconLarge{
+    font-size: 2rem;
+}
+
+.iconMedium{
+    font-size: 1.5rem;
+}
+
+.toolbar {
+    position: sticky;
+    position: -webkit-sticky; // Needed for Safari browsers.
+    z-index: 10000; // This prevents elements to be seen through the toolbar.
+    top: 0; // Required for "position: sticky" to take effect.
+}
